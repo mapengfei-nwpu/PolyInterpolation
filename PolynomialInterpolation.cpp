@@ -1,5 +1,5 @@
 #include <iostream>
-void linear_transformation(double* p, double** F, double* b) {
+void linear_transformation(double* p, double F[3][3], double* b) {
 	
 	///**************************************************
 	///        point1    point2    point3    point4
@@ -40,7 +40,7 @@ void linear_transformation(double* p, double** F, double* b) {
 	b[2] = - F[2][0]*x[0] - F[2][1]*y[0] - F[2][2]*z[0];
 }
 
-void evaluate_basis_at_point(double* point_out, double* point_in, double** F, double* b) {
+void point_local_to_ref(double* point_out, double* point_in, double F[3][3], double* b) {
 
 	point_out[0] = - F[0][0]*point_in[0] - F[0][1]*point_in[1] - F[0][2]*point_in[2];
 	point_out[1] = - F[1][0]*point_in[0] - F[1][1]*point_in[1] - F[1][2]*point_in[2];
@@ -53,5 +53,23 @@ void evaluate_basis_at_point(double* point_out, double* point_in, double** F, do
 
 int main(){
     std::cout<<"Hello world!"<<std::endl;
+    double p[] = {
+        0.0, 2.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    };
+    double F[3][3]={{0}};
+    double b[3]={0};
+    double point_in[3]={0.4,0.3,0.1};
+    double point_out[3]={0};
+
+    linear_transformation(p,F,b);
+    point_local_to_ref(point_out, point_in, F, b);
+
+    std::cout<<point_out[0]<<std::endl;
+    std::cout<<point_out[1]<<std::endl;
+    std::cout<<point_out[2]<<std::endl;
+
+
     return 0;
 }

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <eigen3/Eigen/Eigen>
+#include <assert.h>
 void linear_transformation(double* p, double F[3][3], double* b) {
 	
 	///**************************************************
@@ -50,6 +52,71 @@ void point_local_to_ref(double* point_out, double* point_in, double F[3][3], dou
 	point_out[1] += b[1];
 	point_out[2] += b[2];
 }
+
+void evaluate_basis_at_point(double* point, double* basis){
+    basis[0] = 1.0;
+    basis[1] = point[0];
+    basis[2] = point[1];
+    basis[3] = point[2];
+    basis[4] = point[0]*point[1];
+    basis[5] = point[0]*point[2];
+    basis[6] = point[1]*point[2];
+    basis[7] = point[0]*point[0];
+    basis[8] = point[1]*point[1];
+    basis[9] = point[2]*point[2];
+}
+
+void ref_basis_matrix(double second_tetrahedron_dof_points[10][3],double G_inv[10][10]){
+    double G[10][10]={{0}};
+    for (size_t i = 0; i < 10; i++){
+        evaluate_basis_at_point(second_tetrahedron_dof_points[i],G[i]);
+    }
+    // G_inv = G^{-1}
+    Eigen::MatrixXd G_eigen(10,10);
+    for (size_t i = 0; i < 10; i++)
+        for (size_t j = 0; j < 10; j++)
+            G_eigen(i,j)=G[i][j];
+    
+    Eigen::MatrixXd G_inv_eigen = G_eigen.inverse();
+    
+    for (size_t i = 0; i < 10; i++)
+        for (size_t j = 0; j < 10; j++)
+            G_inv[i][j]=G_inv_eigen(i,j);
+}
+
+
+void evaluate_function_at_points(double G_inv[10][10], double* dof, size_t num_dof, double* points, size_t num_points, size_t value_size, double* results){
+    assert(num_dof%value_size == 0);
+    assert(num_dof%10 == 0);
+    double** parameters = (double**)malloc(sizeof(double*)*value_size);
+    for (size_t i = 0; i < value_size; i++){
+        parameters[i] = (double*)malloc(sizeof(double)*10);
+        for (size_t j = 0; j < 10; j++)
+        {
+            parameters[i][j] = 0.0;
+            for (size_t k = 0; k < 10; k++)
+            {
+                parameters[i][j] += G_inv[j][k]*dof[value_size*k+i];
+            }
+        }
+    }
+
+    for(size_t i = 0; i < num_points; i++){
+        for (size_t j = 0; j < value_size; j++){
+            double result = 0.0;
+            double basis[10] = {0};
+            evaluate_basis_at_point(&(points[3*i]), basis);
+            for (size_t k = 0; k < 10; k++){
+                result += parameters[j][k] * basis[k];
+            }
+            results[value_size*i+j] = result;
+        }
+    }
+    for (size_t i = 0; i < value_size; i++)
+        free(parameters[i]);
+    free(parameters);
+}
+
 
 int main(){
     std::cout<<"Hello world!"<<std::endl;

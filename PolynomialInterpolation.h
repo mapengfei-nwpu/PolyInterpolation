@@ -6,7 +6,7 @@
 
 enum ElementType { Triangle, Tetrahedron, Quadrilateral, Hexahedron };
 
-double first_tetrahedron_dof_points[4][3] = {
+double tetrahedron_vertices[4][3] = {
 	{0.0, 0.0 ,0.0},
 	{1.0, 0.0, 0.0},
 	{0.0, 1.0, 0.0},
@@ -14,13 +14,12 @@ double first_tetrahedron_dof_points[4][3] = {
 };
 
 
-
 class PolynomialInterpolation {
 public:
 	PolynomialInterpolation(){
 		ref_basis_matrix();
 	}
-
+private:
 	void linear_transformation(double* p, double F[3][3], double* b) {
 		
 		///**************************************************
@@ -31,12 +30,13 @@ public:
 		/// z  =    z[0]      z[1]      z[2]      z[3]
 		///
 		///**************************************************
+
 		double* x = p;
 		double* y = &(p[4]);
 		double* z = &(p[8]);
 
 		double det = 
-			x[0] * y[1] * z[2] - x[0] * y[2] * z[1] - x[1] * y[0] * z[2] 
+			  x[0] * y[1] * z[2] - x[0] * y[2] * z[1] - x[1] * y[0] * z[2] 
 			+ x[1] * y[2] * z[0] + x[2] * y[0] * z[1] - x[2] * y[1] * z[0] 
 			- x[0] * y[1] * z[3] + x[0] * y[3] * z[1] + x[1] * y[0] * z[3] 
 			- x[1] * y[3] * z[0] - x[3] * y[0] * z[1] + x[3] * y[1] * z[0] 
@@ -45,17 +45,17 @@ public:
 			- x[1] * y[2] * z[3] + x[1] * y[3] * z[2] + x[2] * y[1] * z[3] 
 			- x[2] * y[3] * z[1] - x[3] * y[1] * z[2] + x[3] * y[2] * z[1];
 
-		F[0][0] =   (y[0] * z[2] - y[2] * z[0] - y[0] * z[3] + y[3] * z[0] + y[2] * z[3] - y[3] * z[2]) / det;
-		F[0][1] =  -(x[0] * z[2] - x[2] * z[0] - x[0] * z[3] + x[3] * z[0] + x[2] * z[3] - x[3] * z[2]) / det;
-		F[0][2] =   (x[0] * y[2] - x[2] * y[0] - x[0] * y[3] + x[3] * y[0] + x[2] * y[3] - x[3] * y[2]) / det;
+		F[0][0] =  -(y[0] * z[2] - y[2] * z[0] - y[0] * z[3] + y[3] * z[0] + y[2] * z[3] - y[3] * z[2]) / det;
+		F[0][1] =   (x[0] * z[2] - x[2] * z[0] - x[0] * z[3] + x[3] * z[0] + x[2] * z[3] - x[3] * z[2]) / det;
+		F[0][2] =  -(x[0] * y[2] - x[2] * y[0] - x[0] * y[3] + x[3] * y[0] + x[2] * y[3] - x[3] * y[2]) / det;
 
-		F[1][0] =  -(y[0] * z[1] - y[1] * z[0] - y[0] * z[3] + y[3] * z[0] + y[1] * z[3] - y[3] * z[1]) / det;
-		F[1][1] =   (x[0] * z[1] - x[1] * z[0] - x[0] * z[3] + x[3] * z[0] + x[1] * z[3] - x[3] * z[1]) / det;
-		F[1][2] =  -(x[0] * y[1] - x[1] * y[0] - x[0] * y[3] + x[3] * y[0] + x[1] * y[3] - x[3] * y[1]) / det;
+		F[1][0] =   (y[0] * z[1] - y[1] * z[0] - y[0] * z[3] + y[3] * z[0] + y[1] * z[3] - y[3] * z[1]) / det;
+		F[1][1] =  -(x[0] * z[1] - x[1] * z[0] - x[0] * z[3] + x[3] * z[0] + x[1] * z[3] - x[3] * z[1]) / det;
+		F[1][2] =   (x[0] * y[1] - x[1] * y[0] - x[0] * y[3] + x[3] * y[0] + x[1] * y[3] - x[3] * y[1]) / det;
 
-		F[2][0] =   (y[0] * z[1] - y[1] * z[0] - y[0] * z[2] + y[2] * z[0] + y[1] * z[2] - y[2] * z[1]) / det;
-		F[2][1] =  -(x[0] * z[1] - x[1] * z[0] - x[0] * z[2] + x[2] * z[0] + x[1] * z[2] - x[2] * z[1]) / det;
-		F[2][2] =   (x[0] * y[1] - x[1] * y[0] - x[0] * y[2] + x[2] * y[0] + x[1] * y[2] - x[2] * y[1]) / det;
+		F[2][0] =  -(y[0] * z[1] - y[1] * z[0] - y[0] * z[2] + y[2] * z[0] + y[1] * z[2] - y[2] * z[1]) / det;
+		F[2][1] =   (x[0] * z[1] - x[1] * z[0] - x[0] * z[2] + x[2] * z[0] + x[1] * z[2] - x[2] * z[1]) / det;
+		F[2][2] =  -(x[0] * y[1] - x[1] * y[0] - x[0] * y[2] + x[2] * y[0] + x[1] * y[2] - x[2] * y[1]) / det;
 
 		b[0] = - F[0][0]*x[0] - F[0][1]*y[0] - F[0][2]*z[0];
 		b[1] = - F[1][0]*x[0] - F[1][1]*y[0] - F[1][2]*z[0];
@@ -64,15 +64,15 @@ public:
 
 	void point_local_to_ref(double* point_out, double* point_in, double F[3][3], double* b) {
 
-		point_out[0] = - F[0][0]*point_in[0] - F[0][1]*point_in[1] - F[0][2]*point_in[2];
-		point_out[1] = - F[1][0]*point_in[0] - F[1][1]*point_in[1] - F[1][2]*point_in[2];
-		point_out[2] = - F[2][0]*point_in[0] - F[2][1]*point_in[1] - F[2][2]*point_in[2];
+		point_out[0] = F[0][0]*point_in[0] + F[0][1]*point_in[1] + F[0][2]*point_in[2];
+		point_out[1] = F[1][0]*point_in[0] + F[1][1]*point_in[1] + F[1][2]*point_in[2];
+		point_out[2] = F[2][0]*point_in[0] + F[2][1]*point_in[1] + F[2][2]*point_in[2];
 		
 		point_out[0] += b[0];
 		point_out[1] += b[1];
 		point_out[2] += b[2];
 	}
-
+public:
 	void evaluate_basis_at_point(double* point, double* basis){
 		basis[0] = 1.0;
 		basis[1] = point[0];
@@ -86,7 +86,17 @@ public:
 		basis[9] = point[2]*point[2];
 	}
 
-	void evaluate_function_at_points(double* dof, size_t num_dof, double* points, size_t num_points, size_t value_size, double* results){
+	void transform_points(double* points_ref, double* points, double* coordinates_dof, size_t num_points) {
+		double F[3][3]={{0}};
+    	double b[3]={0};
+    	linear_transformation(coordinates_dof,F,b);
+		for (size_t i = 0; i < num_points; i++)
+		{
+    		point_local_to_ref(&(points_ref[3*i]), &(points[3*i]), F, b);
+		}
+	}
+	
+	void evaluate_function_at_points(double* dof, size_t num_dof, double* points_ref, size_t num_points, size_t value_size, double* results){
 		assert(num_dof%value_size == 0);
 		assert(num_dof%10 == 0);
 		double** parameters = (double**)malloc(sizeof(double*)*value_size);
@@ -106,7 +116,7 @@ public:
 			for (size_t j = 0; j < value_size; j++){
 				double result = 0.0;
 				double basis[10] = {0};
-				evaluate_basis_at_point(&(points[3*i]), basis);
+				evaluate_basis_at_point(&(points_ref[3*i]), basis);
 				for (size_t k = 0; k < 10; k++){
 					result += parameters[j][k] * basis[k];
 				}
@@ -120,17 +130,17 @@ public:
 
 private:
 	bool useCuda = false;
-	double second_tetrahedron_dof_points[10][3] = {
+	double second_tetrahedron_dof_points[10][3] ={
 		{0.0, 0.0 ,0.0},
-		{0.5, 0.0, 0.0},
 		{1.0, 0.0, 0.0},
-		{0.0, 0.5, 0.0},
 		{0.0, 1.0, 0.0},
-		{0.0, 0.0, 0.5},
 		{0.0, 0.0, 1.0},
-		{0.5, 0.5, 0.0},
-		{0.5, 0.0, 0.5},
 		{0.0, 0.5, 0.5},
+		{0.5, 0.0, 0.5},
+		{0.5, 0.5, 0.0}, 
+		{0.0, 0.0, 0.5},
+		{0.0, 0.5, 0.0},
+		{0.5, 0.0, 0.0}
 	};
 	double G_inv[10][10] = {{0}};
 

@@ -3,17 +3,12 @@ from mshr import *
 domain = Sphere(Point(0, 0, 0), 1)
 mesh = generate_mesh(domain, 10)
 # mesh = UnitCubeMesh(1,1,1)
-
 V = FunctionSpace(mesh,"P",2)
 
-expression = Expression("x[0]+x[1]+x[2]",degree=1)
+
+expression = Expression("x[0]*x[0]+x[1]*x[1]+x[2]*x[2]",degree=1)
 f=Function(V)
 f.interpolate(expression)
-f(0.1,0.2,0.3)
-
-
-
-
 
 import random
 import numpy as np
@@ -27,9 +22,6 @@ for i in range(100000):
     point = mid_point + ran_point
     if cell.contains(point):
         print(point.x(),point.y(),point.z())
-
-        
-
 
 element = V.element()
 dofmap = V.dofmap()

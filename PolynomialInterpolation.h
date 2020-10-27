@@ -22,6 +22,20 @@ public:
 private:
 	void linear_transformation(double* p, double F[3][3], double* b) {
 		
+		// transpose p
+		double temp = p[2];
+		p[2] = p[6];
+		p[6] = p[7];
+		p[7] = p[10];
+		p[10] = p[8];
+		p[8] = temp;
+		temp = p[1];
+		p[1] = p[3];
+		p[3] = p[9];
+		p[9] = p[5];
+		p[5] = p[4];
+		p[4] = temp;
+		
 		///**************************************************
 		///        point1    point2    point3    point4
 		///

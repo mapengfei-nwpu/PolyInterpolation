@@ -6,7 +6,7 @@
 
 enum ElementType { Triangle, Tetrahedron, Quadrilateral, Hexahedron };
 
-double tetrahedron_vertices[4][3] = {
+double my_tetrahedron_vertices[4][3] = {
 	{0.0, 0.0 ,0.0},
 	{1.0, 0.0, 0.0},
 	{0.0, 1.0, 0.0},
@@ -141,11 +141,10 @@ public:
 			free(parameters[i]);
 		free(parameters);
 	}
-	void evaluate_function(double* cell_coordinate_dofs, double* dofs, double* gauss_points, double* results){
-		size_t num_cells = 100;
-		size_t num_gauss = 6;
-		size_t value_size = 3;
-		size_t num_dofs = value_size*10;
+	void evaluate_function(
+		size_t num_cells, size_t num_gauss, size_t value_size, size_t num_dofs,
+		double* cell_coordinate_dofs, double* dofs, double* gauss_points, double* results){
+
 		for (size_t i = 0; i < num_cells; i++)
 		{
 			double* points_ref = (double*)malloc(sizeof(double)*num_gauss*3);

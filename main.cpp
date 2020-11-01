@@ -9,13 +9,13 @@ using namespace dolfin;
 class Inflow : public Expression
 {
 public:
-    //Inflow() : Expression(1) {}
+    Inflow() : Expression(3) {}
 
     void eval(Array<double> &values, const Array<double> &x) const
     {
         values[0] = x[0];
-        //values[1] = x[1];
-        //values[2] = x[2];
+        values[1] = x[1];
+        values[2] = x[2];
     }
 };
 
@@ -96,7 +96,7 @@ int main(){
                           function_dofs.data(),gauss_points.data(),results.data());
     
     for(size_t i = 0; i < 100; i++){
-        std::cout << gauss_points[3*i] << " : " << results[i] << std::endl;
+        std::cout << gauss_points[i] << " : " << results[i] << std::endl;
     }    
 
     return 0;

@@ -121,7 +121,7 @@ public:
 				parameters[i][j] = 0.0;
 				for (size_t k = 0; k < 10; k++)
 				{
-					parameters[i][j] += G_inv[j][k]*dof[value_size*k+i];
+					parameters[i][j] += G_inv[j][k]*dof[i*10+k];
 				}
 			}
 		}

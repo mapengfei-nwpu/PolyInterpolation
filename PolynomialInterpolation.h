@@ -141,18 +141,18 @@ public:
 			free(parameters[i]);
 		free(parameters);
 	}
+
 	void evaluate_function(
 		size_t num_cells, size_t num_gauss, size_t value_size, size_t num_dofs,
-		double* cell_coordinate_dofs, double* dofs, double* gauss_points, double* results){
-
+		double* coordinates, double* dofs, double* gauss_points, double* results){
 		for (size_t i = 0; i < num_cells; i++)
 		{
 			double* points_ref = (double*)malloc(sizeof(double)*num_gauss*3);
 			double* points = &(gauss_points[num_gauss*3*i]);
 			double* dof    = &(dofs[num_dofs*i]);
-			double* coordinate_dofs = &(cell_coordinate_dofs[12*i]);
+			double* cell_coordinates = &(coordinates[12*i]);
 			double* result = &(results[num_gauss*value_size*i]);
-			transform_points(points_ref,points,coordinate_dofs,num_gauss);
+			transform_points(points_ref,points,cell_coordinates,num_gauss);
 			evaluate_function_at_points(dof,num_dofs,points_ref,num_gauss,value_size,result);
 			free(points_ref);
 		}

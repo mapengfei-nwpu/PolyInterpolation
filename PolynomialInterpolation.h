@@ -20,7 +20,7 @@ public:
 		ref_basis_matrix();
 	}
 private:
-	void linear_transformation(double* p, double F[3][3], double* b) {
+	void linear_transformation(double* p, double *F, double* b) {
 		
 		// transpose p
 		double temp = p[2];
@@ -59,28 +59,28 @@ private:
 			- x[1] * y[2] * z[3] + x[1] * y[3] * z[2] + x[2] * y[1] * z[3] 
 			- x[2] * y[3] * z[1] - x[3] * y[1] * z[2] + x[3] * y[2] * z[1];
 
-		F[0][0] =  -(y[0] * z[2] - y[2] * z[0] - y[0] * z[3] + y[3] * z[0] + y[2] * z[3] - y[3] * z[2]) / det;
-		F[0][1] =   (x[0] * z[2] - x[2] * z[0] - x[0] * z[3] + x[3] * z[0] + x[2] * z[3] - x[3] * z[2]) / det;
-		F[0][2] =  -(x[0] * y[2] - x[2] * y[0] - x[0] * y[3] + x[3] * y[0] + x[2] * y[3] - x[3] * y[2]) / det;
+		F[0*3+0] =  -(y[0] * z[2] - y[2] * z[0] - y[0] * z[3] + y[3] * z[0] + y[2] * z[3] - y[3] * z[2]) / det;
+		F[0*3+1] =   (x[0] * z[2] - x[2] * z[0] - x[0] * z[3] + x[3] * z[0] + x[2] * z[3] - x[3] * z[2]) / det;
+		F[0*3+2] =  -(x[0] * y[2] - x[2] * y[0] - x[0] * y[3] + x[3] * y[0] + x[2] * y[3] - x[3] * y[2]) / det;
 
-		F[1][0] =   (y[0] * z[1] - y[1] * z[0] - y[0] * z[3] + y[3] * z[0] + y[1] * z[3] - y[3] * z[1]) / det;
-		F[1][1] =  -(x[0] * z[1] - x[1] * z[0] - x[0] * z[3] + x[3] * z[0] + x[1] * z[3] - x[3] * z[1]) / det;
-		F[1][2] =   (x[0] * y[1] - x[1] * y[0] - x[0] * y[3] + x[3] * y[0] + x[1] * y[3] - x[3] * y[1]) / det;
+		F[1*3+0] =   (y[0] * z[1] - y[1] * z[0] - y[0] * z[3] + y[3] * z[0] + y[1] * z[3] - y[3] * z[1]) / det;
+		F[1*3+1] =  -(x[0] * z[1] - x[1] * z[0] - x[0] * z[3] + x[3] * z[0] + x[1] * z[3] - x[3] * z[1]) / det;
+		F[1*3+2] =   (x[0] * y[1] - x[1] * y[0] - x[0] * y[3] + x[3] * y[0] + x[1] * y[3] - x[3] * y[1]) / det;
 
-		F[2][0] =  -(y[0] * z[1] - y[1] * z[0] - y[0] * z[2] + y[2] * z[0] + y[1] * z[2] - y[2] * z[1]) / det;
-		F[2][1] =   (x[0] * z[1] - x[1] * z[0] - x[0] * z[2] + x[2] * z[0] + x[1] * z[2] - x[2] * z[1]) / det;
-		F[2][2] =  -(x[0] * y[1] - x[1] * y[0] - x[0] * y[2] + x[2] * y[0] + x[1] * y[2] - x[2] * y[1]) / det;
+		F[2*3+0] =  -(y[0] * z[1] - y[1] * z[0] - y[0] * z[2] + y[2] * z[0] + y[1] * z[2] - y[2] * z[1]) / det;
+		F[2*3+1] =   (x[0] * z[1] - x[1] * z[0] - x[0] * z[2] + x[2] * z[0] + x[1] * z[2] - x[2] * z[1]) / det;
+		F[2*3+2] =  -(x[0] * y[1] - x[1] * y[0] - x[0] * y[2] + x[2] * y[0] + x[1] * y[2] - x[2] * y[1]) / det;
 
-		b[0] = - F[0][0]*x[0] - F[0][1]*y[0] - F[0][2]*z[0];
-		b[1] = - F[1][0]*x[0] - F[1][1]*y[0] - F[1][2]*z[0];
-		b[2] = - F[2][0]*x[0] - F[2][1]*y[0] - F[2][2]*z[0];
+		b[0] = - F[0*3+0]*x[0] - F[0*3+1]*y[0] - F[0*3+2]*z[0];
+		b[1] = - F[1*3+0]*x[0] - F[1*3+1]*y[0] - F[1*3+2]*z[0];
+		b[2] = - F[2*3+0]*x[0] - F[2*3+1]*y[0] - F[2*3+2]*z[0];
 	}
 
-	void point_local_to_ref(double* point_out, double* point_in, double F[3][3], double* b) {
+	void point_local_to_ref(double* point_out, double* point_in, double *F, double* b) {
 
-		point_out[0] = F[0][0]*point_in[0] + F[0][1]*point_in[1] + F[0][2]*point_in[2];
-		point_out[1] = F[1][0]*point_in[0] + F[1][1]*point_in[1] + F[1][2]*point_in[2];
-		point_out[2] = F[2][0]*point_in[0] + F[2][1]*point_in[1] + F[2][2]*point_in[2];
+		point_out[0] = F[0*3+0]*point_in[0] + F[0*3+1]*point_in[1] + F[0*3+2]*point_in[2];
+		point_out[1] = F[1*3+0]*point_in[0] + F[1*3+1]*point_in[1] + F[1*3+2]*point_in[2];
+		point_out[2] = F[2*3+0]*point_in[0] + F[2*3+1]*point_in[1] + F[2*3+2]*point_in[2];
 		
 		point_out[0] += b[0];
 		point_out[1] += b[1];
@@ -101,7 +101,7 @@ public:
 	}
 
 	void transform_points(double* points_ref, double* points, double* coordinates_dof, size_t num_points) {
-		double F[3][3]={{0}};
+		double F[9]={0};
     	double b[3]={0};
     	linear_transformation(coordinates_dof,F,b);
 		for (size_t i = 0; i < num_points; i++)
@@ -157,6 +157,7 @@ public:
 			free(points_ref);
 		}
 	}
+
 private:
 	bool useCuda = false;
 	double second_tetrahedron_dof_points[10][3] ={

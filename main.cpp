@@ -2,6 +2,7 @@
 #include <dolfin/geometry/SimplexQuadrature.h>
 #include"PolynomialInterpolation.h"
 #include"TetPoisson.h"
+#include "Myio.h"
 
 using namespace dolfin;
 
@@ -82,6 +83,11 @@ int main(){
     std::vector<double> results;
     
     get_gauss_rule(f,gauss_points,gauss_weights,function_dofs,coordinates,num_gauss);
+
+    output("coordinates.txt", coordinates);
+    output("function_dofs.txt", function_dofs);
+    output("gauss_points.txt", gauss_points);
+    output("gauss_weights.txt", gauss_weights);
 
     num_cells = gauss_points.size()/num_gauss/3;
     value_size = f->value_size();

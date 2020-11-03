@@ -109,6 +109,71 @@ __global__ void transform_points_all_device(
     }
 }
 
+__device__ void evaluate_basis_at_point(double *point, double *basis)
+{
+    basis[0] = 1.0;
+    basis[1] = point[0];
+    basis[2] = point[1];
+    basis[3] = point[2];
+    basis[4] = point[0] * point[1];
+    basis[5] = point[0] * point[2];
+    basis[6] = point[1] * point[2];
+    basis[7] = point[0] * point[0];
+    basis[8] = point[1] * point[1];
+    basis[9] = point[2] * point[2];
+}
+
+__device__ void evaluate_function_at_points(double *dof, double *dof_params, size_t num_dofs, double *points_ref, size_t num_points, size_t value_size, double *results)
+{
+    for (size_t i = 0; i < value_size; i++)
+    {
+        for (size_t j = 0; j < 10; j++)
+        {
+            dof_params[i*10+j] = 0.0;
+            for (size_t k = 0; k < 10; k++)
+            {
+                dof_params[i*10+j] += cudaG_inv[j * 10 + k] * dof[i * 10 + k];
+            }
+        }
+    }
+    double result = 0.0;
+    double basis[10] = {0};
+    for (size_t i = 0; i < num_points; i++)
+    {
+        for (size_t j = 0; j < value_size; j++)
+        {
+            result = 0.0;
+            evaluate_basis_at_point(&(points_ref[3 * i]), basis);
+            for (size_t k = 0; k < 10; k++)
+            {
+                result += dof_params[j*10+k] * basis[k];
+            }
+            results[value_size * i + j] = result;
+        }
+    }
+}
+
+__global__ void evaluate_function_at_points_all_device(
+    size_t num_cells,
+    size_t num_dofs,     
+    size_t num_gauss, 
+    size_t value_size, 
+    double *dofs, 
+    double *dof_parameters, 
+    double *gauss_points_ref, 
+    double *results)
+{
+    uint index = __umul24(blockIdx.x,blockDim.x) + threadIdx.x;
+    if(index < num_cells){
+        double *points_ref = &(gauss_points_ref[num_gauss * 3 * index]);
+        double *dof = &(dofs[num_dofs * index]);
+        double *dof_params = &(dof_parameters[num_dofs * index]);
+        double *result = &(results[num_gauss * value_size * index]);
+        evaluate_function_at_points(dof, dof_params, num_dofs, points_ref, num_gauss, value_size, result);
+    }
+}
+
+
 extern "C"{
 
     void setCudaG_inv(double *G_inv)
@@ -148,9 +213,6 @@ extern "C"{
         double *gauss_points_host,
         double *gauss_points_ref_host
     ){
-        uint numThreads, numBlocks;
-        computeGridSize(num_cells, 256, numBlocks, numThreads);
-
         double *coordinates;
         double *gauss_points;
         double *gauss_points_ref;
@@ -161,6 +223,8 @@ extern "C"{
         checkCudaErrors(cudaMemcpy(coordinates, coordinates_host, 12*num_cells*sizeof(double), cudaMemcpyHostToDevice));
         checkCudaErrors(cudaMemcpy(gauss_points, gauss_points_host, 3*num_gauss*num_cells*sizeof(double), cudaMemcpyHostToDevice));
 
+        uint numThreads, numBlocks;
+        computeGridSize(num_cells, 256, numBlocks, numThreads);
         transform_points_all_device<<< numBlocks, numThreads >>>(
             num_cells,
             num_gauss,
@@ -175,6 +239,49 @@ extern "C"{
         cudaFree(gauss_points);
         cudaFree(gauss_points_ref);
         cudaFree(coordinates);
+    }
+
+    void evaluate_function_at_points_all(
+        size_t num_cells,
+        size_t num_dofs,     
+        size_t num_points, 
+        size_t value_size, 
+        double *dofs_host, 
+        double *dof_parameters_host, 
+        double *gauss_points_ref_host, 
+        double *results_host
+    ){
+        double *dofs; 
+        double *dof_parameters;
+        double *gauss_points_ref;
+        double *results;
+
+        checkCudaErrors(cudaMalloc((void **)&dofs, num_dofs*num_cells*sizeof(double)));
+        checkCudaErrors(cudaMalloc((void **)&dof_parameters, num_dofs*num_cells*sizeof(double)));
+        checkCudaErrors(cudaMalloc((void **)&gauss_points_ref, num_points*num_cells*sizeof(double)));
+        checkCudaErrors(cudaMalloc((void **)&results, value_size*num_points*num_cells*sizeof(double)));
+        checkCudaErrors(cudaMemcpy(dofs, dofs_host, num_dofs*num_cells*sizeof(double), cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpy(gauss_points_ref, gauss_points_ref_host, num_points*num_cells*sizeof(double), cudaMemcpyHostToDevice));
+        
+        uint numThreads, numBlocks;
+        computeGridSize(num_cells, 256, numBlocks, numThreads);
+        evaluate_function_at_points_all_device<<< numBlocks, numThreads >>>(
+            num_cells,
+            num_dofs,     
+            num_points, 
+            value_size, 
+            dofs, 
+            dof_parameters, 
+            gauss_points_ref, 
+            results);
+
+        getLastCudaError("Kernel execution failed");
+
+        checkCudaErrors(cudaMemcpy(results_host, results, value_size*num_points*num_cells*sizeof(double), cudaMemcpyDeviceToHost));
+        cudaFree(dofs);
+        cudaFree(dof_parameters);
+        cudaFree(gauss_points_ref);
+        cudaFree(results);
     }
 }
 

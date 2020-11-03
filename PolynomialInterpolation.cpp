@@ -1,5 +1,6 @@
 #include "PolynomialInterpolation.h"
 #include "PolynomialInterpolation.cuh"
+#include <ctime>
 
 enum ElementType { Triangle, Tetrahedron, Quadrilateral, Hexahedron };
 
@@ -130,9 +131,11 @@ void PolynomialInterpolation::evaluate_function(
     size_t num_cells, size_t num_gauss, size_t value_size, size_t num_dofs,
     double *coordinates, double *dofs, double *gauss_points, double *results)
 {
+    clock_t start = std::clock();
     double *gauss_points_ref = (double *)malloc(sizeof(double) *num_cells * num_gauss * 3);
     double *dof_parameters  = (double *)malloc(sizeof(double) *num_cells * num_dofs);
-    if(false){
+    useCuda = false;
+    if(useCuda){
         transform_points_all(num_cells, num_gauss, coordinates, gauss_points, gauss_points_ref);
     } 
     else {
@@ -143,19 +146,25 @@ void PolynomialInterpolation::evaluate_function(
             transform_points(points_ref, points, cell_coordinates, num_gauss);
         }
     }
-    
-
-    for (size_t i = 0; i < num_cells; i++)
-    {
-        double *points_ref = &(gauss_points_ref[num_gauss * 3 * i]);
-        double *dof = &(dofs[num_dofs * i]);
-        double *dof_params = &(dof_parameters[num_dofs * i]);
-        double *result = &(results[num_gauss * value_size * i]);
-        evaluate_function_at_points(dof, dof_params, num_dofs, points_ref, num_gauss, value_size, result);
+    if(useCuda){
+        evaluate_function_at_points_all(num_cells,num_dofs, num_gauss, value_size, dofs, dof_parameters, gauss_points_ref, results);
+    }
+    else {
+        for (size_t i = 0; i < num_cells; i++)
+        {
+            double *points_ref = &(gauss_points_ref[num_gauss * 3 * i]);
+            double *dof = &(dofs[num_dofs * i]);
+            double *dof_params = &(dof_parameters[num_dofs * i]);
+            double *result = &(results[num_gauss * value_size * i]);
+            evaluate_function_at_points(dof, dof_params, num_dofs, points_ref, num_gauss, value_size, result);
+        }
     }
     free(dof_parameters);
     free(gauss_points_ref);
-
+    clock_t end = std::clock();
+    if (useCuda) printf("use cuda :\n");
+    else printf("not use cuda:\n");
+    std::cout << "花费了" << (double)(end - start) / CLOCKS_PER_SEC << "秒" << std::endl;
 }
 
 void PolynomialInterpolation::ref_basis_matrix()

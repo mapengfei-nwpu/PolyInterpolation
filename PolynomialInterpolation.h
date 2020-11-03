@@ -3,7 +3,7 @@
 #include <iostream>
 #include <eigen3/Eigen/Eigen>
 #include <assert.h>
-#include <cuda_runtime.h>
+
 
 
 class PolynomialInterpolation {

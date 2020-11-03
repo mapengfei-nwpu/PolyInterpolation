@@ -1,6 +1,5 @@
 #include "PolynomialInterpolation.h"
-
-__constant__ double cudaG_inv[100];
+#include "PolynomialInterpolation.cuh"
 
 enum ElementType { Triangle, Tetrahedron, Quadrilateral, Hexahedron };
 
@@ -10,7 +9,6 @@ double my_tetrahedron_vertices[4][3] = {
 	{0.0, 1.0, 0.0},
 	{0.0, 0.0, 1.0}
 };
-
 
 void PolynomialInterpolation::linear_transformation(double *p, double *F, double *b)
 {
@@ -173,6 +171,8 @@ void PolynomialInterpolation::ref_basis_matrix()
 
     if (useCuda)
     {
-        cudaMemcpyToSymbol(cudaG_inv, G_inv, sizeof(double) * 100);
+        setCudaG_inv(G_inv);
+        outputG_inv();
     }
+
 }

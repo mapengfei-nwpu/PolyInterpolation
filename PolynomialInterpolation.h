@@ -21,7 +21,7 @@ public:
 
 	void transform_points(double* points_ref, double* points, double* coordinates_dof, size_t num_points);
 	
-	void evaluate_function_at_points(double* dof, size_t num_dof, double* points_ref, size_t num_points, size_t value_size, double* results);
+	void evaluate_function_at_points(double* dof, double* dof_params, size_t num_dof, double* points_ref, size_t num_points, size_t value_size, double* results);
 
 	void evaluate_function(size_t num_cells, size_t num_gauss, size_t value_size, size_t num_dofs,
 		double* coordinates, double* dofs, double* gauss_points, double* results);

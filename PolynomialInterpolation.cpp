@@ -96,41 +96,34 @@ void PolynomialInterpolation::transform_points(double *points_ref, double *point
         point_local_to_ref(&(points_ref[3 * i]), &(points[3 * i]), F, b);
     }
 }
-void PolynomialInterpolation::evaluate_function_at_points(double *dof, size_t num_dof, double *points_ref, size_t num_points, size_t value_size, double *results)
+void PolynomialInterpolation::evaluate_function_at_points(double *dof, double *dof_params, size_t num_dof, double *points_ref, size_t num_points, size_t value_size, double *results)
 {
-    assert(num_dof % value_size == 0);
-    assert(num_dof % 10 == 0);
-    double **parameters = (double **)malloc(sizeof(double *) * value_size);
     for (size_t i = 0; i < value_size; i++)
     {
-        parameters[i] = (double *)malloc(sizeof(double) * 10);
         for (size_t j = 0; j < 10; j++)
         {
-            parameters[i][j] = 0.0;
+            dof_params[i*10+j] = 0.0;
             for (size_t k = 0; k < 10; k++)
             {
-                parameters[i][j] += G_inv[j * 10 + k] * dof[i * 10 + k];
+                dof_params[i*10+j] += G_inv[j * 10 + k] * dof[i * 10 + k];
             }
         }
     }
-
+    double result = 0.0;
+    double basis[10] = {0};
     for (size_t i = 0; i < num_points; i++)
     {
         for (size_t j = 0; j < value_size; j++)
         {
-            double result = 0.0;
-            double basis[10] = {0};
+            result = 0.0;
             evaluate_basis_at_point(&(points_ref[3 * i]), basis);
             for (size_t k = 0; k < 10; k++)
             {
-                result += parameters[j][k] * basis[k];
+                result += dof_params[j*10+k] * basis[k];
             }
             results[value_size * i + j] = result;
         }
     }
-    for (size_t i = 0; i < value_size; i++)
-        free(parameters[i]);
-    free(parameters);
 }
 
 void PolynomialInterpolation::evaluate_function(
@@ -138,6 +131,7 @@ void PolynomialInterpolation::evaluate_function(
     double *coordinates, double *dofs, double *gauss_points, double *results)
 {
     double *gauss_points_ref = (double *)malloc(sizeof(double) *num_cells * num_gauss * 3);
+    double *dof_parameters  = (double *)malloc(sizeof(double) *num_cells * num_dofs);
     if(false){
         transform_points_all(num_cells, num_gauss, coordinates, gauss_points, gauss_points_ref);
     } 
@@ -155,9 +149,11 @@ void PolynomialInterpolation::evaluate_function(
     {
         double *points_ref = &(gauss_points_ref[num_gauss * 3 * i]);
         double *dof = &(dofs[num_dofs * i]);
+        double *dof_params = &(dof_parameters[num_dofs * i]);
         double *result = &(results[num_gauss * value_size * i]);
-        evaluate_function_at_points(dof, num_dofs, points_ref, num_gauss, value_size, result);
+        evaluate_function_at_points(dof, dof_params, num_dofs, points_ref, num_gauss, value_size, result);
     }
+    free(dof_parameters);
     free(gauss_points_ref);
 
 }

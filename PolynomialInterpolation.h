@@ -121,7 +121,7 @@ public:
 				parameters[i][j] = 0.0;
 				for (size_t k = 0; k < 10; k++)
 				{
-					parameters[i][j] += G_inv[j][k]*dof[i*10+k];
+					parameters[i][j] += G_inv[j*10+k]*dof[i*10+k];
 				}
 			}
 		}
@@ -172,7 +172,7 @@ private:
 		{0.0, 0.5, 0.0},
 		{0.5, 0.0, 0.0}
 	};
-	double G_inv[10][10] = {{0}};
+	double G_inv[10*10] = {0};
 
 private:
 	void ref_basis_matrix(){
@@ -190,7 +190,7 @@ private:
 		
 		for (size_t i = 0; i < 10; i++)
 			for (size_t j = 0; j < 10; j++)
-				G_inv[i][j]=G_inv_eigen(i,j);
+				G_inv[i*10+j]=G_inv_eigen(i,j);
 	}
 };
 

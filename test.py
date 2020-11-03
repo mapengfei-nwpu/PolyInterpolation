@@ -2,11 +2,11 @@ from fenics import *
 from mshr import *
 domain = Sphere(Point(0, 0, 0), 1)
 mesh = generate_mesh(domain, 10)
-# mesh = UnitCubeMesh(1,1,1)
-V = FunctionSpace(mesh,"P",2)
+mesh = UnitCubeMesh(32,32,32)
+V = VectorFunctionSpace(mesh,"P",2)
 
 
-expression = Expression("x[0]*x[0]+x[1]*x[1]+x[2]*x[2]",degree=1)
+expression = Expression(("x[0]","x[1]","x[2]"),degree=1)
 f=Function(V)
 f.interpolate(expression)
 

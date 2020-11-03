@@ -3,6 +3,8 @@
 #include <iostream>
 #include <eigen3/Eigen/Eigen>
 #include <assert.h>
+#include <cuda_runtime.h>
+__constant__ double cudaG_inv[100];
 
 enum ElementType { Triangle, Tetrahedron, Quadrilateral, Hexahedron };
 
@@ -159,7 +161,7 @@ public:
 	}
 
 private:
-	bool useCuda = false;
+	bool useCuda = true;
 	double second_tetrahedron_dof_points[10][3] ={
 		{0.0, 0.0 ,0.0},
 		{1.0, 0.0, 0.0},
@@ -191,6 +193,12 @@ private:
 		for (size_t i = 0; i < 10; i++)
 			for (size_t j = 0; j < 10; j++)
 				G_inv[i*10+j]=G_inv_eigen(i,j);
+		
+		if(useCuda){
+			cudaMemcpyToSymbol(cudaG_inv, G_inv, sizeof(double)*100);
+		}
+
+
 	}
 };
 

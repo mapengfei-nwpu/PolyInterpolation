@@ -7,4 +7,4 @@ project(${PROJECT_NAME})
 cmake_policy(SET CMP0004 NEW)
 
 # Executable
-add_executable(${PROJECT_NAME} main_copy.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
